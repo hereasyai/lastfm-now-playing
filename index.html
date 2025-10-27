@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Now Playing on Last.fm</title>
+  <style>
+    #lastfm-track {
+      font-family: sans-serif;
+      margin-top: 40px;
+      text-align: center;
+    }
+    #lastfm-track img {
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="lastfm-track">Loading...</div>
+
+  <script>
+    const API_KEY = "f9c966210a703e7787ad7101854833d";
+    const USERNAME = "daynalanell";
+
+    async function getLatestTrack() {
+      const url = `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${USERNAME}&api_key=${API_KEY}&format=json&limit=1`;
+      const res = await fetch(url);
+      const data = await res.json();
+      const track = data.recenttracks.track[0];
+      return {
+        artist: track.artist['#text'],
+        name: track.name,
+        album: track.album['#text'],
+        image: track.image[2]['#text'] || '',
+        nowPlaying: track['@attr'] && track['@attr'].nowplaying
+      };
+    }
+
+    getLatestTrack().then(track => {
+      const el = document.getElementById('lastfm-track');
+      el.innerHTML = track.nowPlaying
+        ? `Now Playing: <strong>${track.name}</strong> by <strong>${track.artist}</strong><br><img src="${track.image}" alt="Album cover" />`
+        : `Last Played: <strong>${track.name}</strong> by <strong>${track.artist}</strong><br><img src="${track.image}" alt="Album cover" />`;
+    }).catch(() => {
+      document.getElementById('lastfm-track').innerText = "Unable to load track info.";
+    });
+  </script>
+</body>
+</html>
